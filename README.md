@@ -2,7 +2,7 @@
 
 A Streamlit application that ranks Pokémon based on community preferences through head-to-head comparisons.
 
-![Pokémon Comparison](https://i.imgur.com/example1.jpg)
+[Use the app live!](https://pokemon-popularity-contest.streamlit.app/)
 
 ## 🌟 Features
 
@@ -14,9 +14,12 @@ A Streamlit application that ranks Pokémon based on community preferences throu
 
 ## 💻 Technology
 
-- **Frontend**: Built with [Streamlit](https://streamlit.io/)
+- **Frontend**: ![Static Badge](https://img.shields.io/badge/Streamlit-cloud?logo=streamlit&color=grey&link=https%3A%2F%2Fstreamlit.io%2Fcloud)
+
+
 - **Ranking Algorithm**: Uses ELO rating system (similar to chess rankings)
-- **Backend**: Built on [Supabase](https://supabase.com/)
+- **Backend**: ![Static Badge](https://img.shields.io/badge/Supabase-database?logo=supabase&color=grey&link=https%3A%2F%2Fsupabase.com%2F)
+
 
 ## 🛠️ Installation
 
