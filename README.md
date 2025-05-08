@@ -26,7 +26,7 @@ A Streamlit application that ranks Pokémon based on community preferences throu
 ### Prerequisites
 
 - Python 3.12+
-- pip
+- poetry
 
 ### Setup
 
@@ -59,7 +59,7 @@ The app uses an ELO rating system where:
 
 ### Comparison Process
 
-1. Two random Pokémon are presented to the user
+1. Two Pokémon are presented to the user
 2. User selects their favorite
 3. ELO ratings are updated based on the selection
 4. Process repeats with a new pair
@@ -67,7 +67,7 @@ The app uses an ELO rating system where:
 
 ## 📝 Usage
 
-1. Navigate to the app in your browser
+1. [Navigate to the app in your browser](https://pokemon-popularity-contest.streamlit.app/)
 2. Initialize the dataset, including any number of pokemon generations
 2. Click on your preferred Pokémon in each matchup
 3. Continue voting to help establish accurate community rankings
