@@ -133,21 +133,15 @@ def select_pokemon(pokemon_data):
         behavior = random.random()
 
         if behavior < 0.25:
-            # Find the pokemon with the fewest wins and losses
-            fewest_wins_losses = min(
-                pokemon_data,
-                key=lambda x: x.get("wins", 0) + x.get("losses", 0),
+            # sort the dataset by total number of wins + losses
+            # Then select the bottom 10% of the dataset
+            sorted_pokemon = sorted(
+                pokemon_data, key=lambda x: x.get("wins", 0) + x.get("losses", 0)
             )
-            # get the pokemon with the fewest wins and losses
-            fewest_wins_losses = [
-                pokemon
-                for pokemon in pokemon_data
-                if pokemon.get("wins", 0) + pokemon.get("losses", 0)
-                == fewest_wins_losses.get("wins", 0)
-                + fewest_wins_losses.get("losses", 0)
-            ]
-            if len(fewest_wins_losses) > 1:
-                return random.sample(fewest_wins_losses, 2)
+            start_index = int(len(sorted_pokemon) * 0.9)
+            bottom_pokemon = sorted_pokemon[start_index:-1]
+            if len(bottom_pokemon) > 1:
+                return random.sample(bottom_pokemon, 2)
 
         elif behavior < 0.75:
             # Break the dataset into quartiles and
