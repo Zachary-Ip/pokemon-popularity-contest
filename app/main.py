@@ -2,7 +2,6 @@ import os
 import random
 import traceback
 
-import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
@@ -120,34 +119,6 @@ def generation_module(key, label="Filter by Pokémon generation:"):
     )
 
 
-def type_module(label="Filter by pokemon type"):
-    """
-    Display a multi-select pills UI for choosing Pokémon types.
-    Returns a list of selected types.
-    """
-    types = [
-        "Normal",
-        "Fire",
-        "Water",
-        "Grass",
-        "Electric",
-        "Ice",
-        "Fighting",
-        "Poison",
-        "Ground",
-        "Flying",
-        "Psychic",
-        "Bug",
-        "Rock",
-        "Ghost",
-        "Dragon",
-        "Dark",
-        "Steel",
-        "Fairy",
-    ]
-    return st.pills(label, types, default=[], selection_mode="multi")
-
-
 def select_pokemon(pokemon_data):
     # Check if there are any pokemon who have not been compared yet using total wins + losses
     not_compared = [
@@ -181,11 +152,13 @@ def select_pokemon(pokemon_data):
         elif behavior < 0.75:
             # Break the dataset into quartiles and
             # select two pokemon from a random quartile to keep comparisons competitive
+            max_divs = 20
+            num_divisions = random.randrange(2, max_divs)
             sorted_pokemon = sorted(pokemon_data, key=lambda x: x.get("elo", 0))
-            quartile_size = len(sorted_pokemon) // 4
-            quartile = random.randint(0, 3)
-            start_index = quartile * quartile_size
-            end_index = start_index + quartile_size
+            div_size = len(sorted_pokemon) // num_divisions
+            div = random.randint(0, max_divs)
+            start_index = div * div_size
+            end_index = start_index + div_size
             quartile_pokemon = sorted_pokemon[start_index:end_index]
             if len(quartile_pokemon) > 1:
                 return random.sample(quartile_pokemon, 2)
@@ -277,36 +250,6 @@ def calculate_elo(rating_a, rating_b, result, k_factor=32):
     return new_rating_a, new_rating_b
 
 
-def display_tier(tier, quartile_size, sorted_pokemon, header):
-    start_index = tier * quartile_size
-    end_index = start_index + quartile_size
-    quartile_pokemon = sorted_pokemon[start_index:end_index]
-
-    im_size = 250
-
-    with st.container(border=True):
-        st.subheader(header)
-        st.write(
-            f"**Elo range:** {quartile_pokemon[0]['elo']:0.2f} - {quartile_pokemon[-1]['elo']:0.2f}"
-        )
-
-        left, right = st.columns(2)
-        with left:
-            st.write("**Top Pokémon**")
-            st.image(
-                quartile_pokemon[0]["image_url"],
-                width=im_size,
-                caption=quartile_pokemon[0]["name"],
-            )
-        with right:
-            st.write("**Bottom Pokémon**")
-            st.image(
-                quartile_pokemon[-1]["image_url"],
-                width=im_size,
-                caption=quartile_pokemon[-1]["name"],
-            )
-
-
 # Main app
 def main():
     st.set_page_config(
@@ -360,11 +303,12 @@ def main():
 
         pokemon_a, pokemon_b = select_pokemon(data)
 
-        A_col, B_col = st.columns(2)
+        A_col, B_col, C_col = st.columns((4, 1, 4))
 
         with A_col:
             st.subheader(pokemon_a["name"])
-            st.image(pokemon_a["image_url"], width=im_size)
+            with st.container(border=True):
+                st.image(pokemon_a["image_url"], width=im_size)
 
             if st.button("Choose this Pokémon", key="winner_A"):
                 new_rating_a, new_rating_b = calculate_elo(
@@ -385,11 +329,15 @@ def main():
                     },
                 ]
                 update_pokemon_ratings(pokemon_to_update_a)
-
         with B_col:
+            st.header("")
+            st.header("")
+            st.header("VS")
+        with C_col:
 
             st.subheader(pokemon_b["name"])
-            st.image(pokemon_b["image_url"], width=im_size)
+            with st.container(border=True):
+                st.image(pokemon_b["image_url"], width=im_size)
             if st.button("Choose this Pokémon", key="winner_B"):
                 new_rating_a, new_rating_b = calculate_elo(
                     st.session_state.pokemon_a["elo"],
@@ -463,58 +411,6 @@ def main():
                 f"**Elo:** {least_popular['elo'].values[0]:0.2f} | **Wins:** {least_popular['wins'].values[0]} | **Losses:** {least_popular['losses'].values[0]}"
             )
 
-        st.header("📊 Pokémon Distributions")
-        # create a histogram of the Elo ratings
-        elo_fig, elo_ax = plt.subplots()
-        elo_ax.hist(df["elo"], bins=30, color="blue", alpha=0.7, density=True)
-        elo_ax.set_xlabel("Elo rating")
-        elo_ax.set_ylabel("Frequency")
-        elo_ax.spines["top"].set_visible(False)
-        elo_ax.spines["right"].set_visible(False)
-        elo_ax.spines["left"].set_visible(False)
-        elo_ax.axvline(
-            df["elo"].median(), color="black", linestyle="--", label="Median"
-        )
-
-        left, right = st.columns(2)
-
-        comp_fig, comp_ax = plt.subplots()
-        comp_ax.hist(
-            (df["wins"] + df["losses"]), bins=30, color="blue", alpha=0.7, density=True
-        )
-        comp_ax.set_xlabel("Number of times compared")
-        comp_ax.set_ylabel("Frequency")
-        comp_ax.spines["top"].set_visible(False)
-        comp_ax.spines["right"].set_visible(False)
-        comp_ax.spines["left"].set_visible(False)
-        comp_ax.spines["bottom"].set_visible(False)
-        comp_ax.axvline(
-            (df["wins"] + df["losses"]).median(),
-            color="black",
-            linestyle="--",
-            label="Median",
-        )
-        with left:
-            # Distribution of Elo ratings
-            st.subheader("Elo ratings")
-            st.pyplot(elo_fig, use_container_width=True)
-        with right:
-            # Distribution of number of times compared (wins + losses)
-            st.subheader("Comparisons")
-            st.pyplot(comp_fig, use_container_width=True)
-
-        st.header("Competitive match making tiers")
-        sorted_pokemon = sorted(data, key=lambda x: x.get("elo", 0), reverse=True)
-        quartile_size = len(sorted_pokemon) // 4
-        # Champion tier
-        display_tier(0, quartile_size, sorted_pokemon, "🏆 Champion Tier")
-        # Gold tier
-        display_tier(1, quartile_size, sorted_pokemon, "🥇 Gold Tier")
-        # Silver tier
-        display_tier(2, quartile_size, sorted_pokemon, "🥈 Silver Tier")
-        # Bronze tier
-        display_tier(3, quartile_size, sorted_pokemon, "🥉 Bronze Tier")
-
     # Results tab
     with tab_results:
         st.header("📊 Leaderboard")
@@ -586,17 +482,17 @@ def main():
         )
         st.write(
             """
-**🤼 Ranked Matchmaking (50%)**: 
+**🤼 Ranked Matchmaking:**: 
 
-Ranked match making is selected 50% of the time, and is done by breaking the dataset into quartiles and selecting two Pokémon from a random quartile. This is to keep comparisons competitive.
+50% of the time the dataset is split between 2 and 10 divisions and selects two Pokémon from a the same division. This is to keep comparisons competitive.
 
-**🎲 Select two Pokémon at random (25%)**: 
+**🎲 Select two Pokémon at random:**: 
 
-Pure random selection is selected 25% of the time to ensure all Pokémon have the chance to be compared against any other, allowing for potential upsets.
+25% of the time two Pokémon are selected from all available filtered Pokémon to ensure all Pokémon have the chance to be compared against any other, allowing for potential upsets.
 
-**⚖️ Select two Pokémon with the fewest comparisons (25%)**: 
+**⚖️ Select two Pokémon with the fewest comparisons:**: 
 
-Two Pokémon with the fewest comparisons is choosen 25% of the time to ensure that underrepresented Pokémon are given a higher chance to be compared.
+25% of the time two Pokémon with the fewest comparisons are pciked to ensure that underrepresented Pokémon are given a higher chance to be compared.
 """
         )
         st.subheader("🌐 Universal Pokémon Elo rating")
