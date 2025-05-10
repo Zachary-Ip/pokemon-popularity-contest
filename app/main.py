@@ -153,7 +153,7 @@ def select_pokemon(pokemon_data):
             # Break the dataset into quartiles and
             # select two pokemon from a random quartile to keep comparisons competitive
             max_divs = 20
-            num_divisions = random.randrange(2, max_divs)
+            num_divisions = random.randrange(4, max_divs)
             sorted_pokemon = sorted(pokemon_data, key=lambda x: x.get("elo", 0))
             div_size = len(sorted_pokemon) // num_divisions
             div = random.randint(0, max_divs)
@@ -484,7 +484,7 @@ def main():
             """
 **🤼 Ranked Matchmaking:**: 
 
-50% of the time the dataset is split between 2 and 10 divisions and selects two Pokémon from a the same division. This is to keep comparisons competitive.
+50% of the time the dataset is split between 4 and 10 divisions and selects two Pokémon from a the same division. This is to keep comparisons competitive.
 
 **🎲 Select two Pokémon at random:**: 
 
@@ -492,7 +492,7 @@ def main():
 
 **⚖️ Select two Pokémon with the fewest comparisons:**: 
 
-25% of the time two Pokémon with the fewest comparisons are pciked to ensure that underrepresented Pokémon are given a higher chance to be compared.
+25% of the time two Pokémon with the fewest comparisons are picked to ensure that underrepresented Pokémon are given a higher chance to be compared.
 """
         )
         st.subheader("🌐 Universal Pokémon Elo rating")
