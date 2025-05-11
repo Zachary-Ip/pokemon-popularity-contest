@@ -356,10 +356,14 @@ def main():
     with tab_summary:
 
         df = pd.DataFrame(data)
-        num_votes = df["wins"].sum()
+        df["comparisons"] = df["wins"] + df["losses"]
+        num_votes = int(df["comparisons"].sum() // 2)
         im_size = 250
-        st.header(f"📈 Together we've voted {num_votes} times! ")
+        st.subheader(f"📈 Together we've voted {num_votes} times! ")
 
+        # Calculate the average number of votes per Pokémon (wins + losses)
+        med_votes = int(df["comparisons"].median())
+        st.subheader(f"📊 The median Pokémon has had {med_votes} comparisons!")
         left, center, right = st.columns(3)
 
         with left:
@@ -368,42 +372,45 @@ def main():
                 df["elo"] == df["elo"].max(),
                 ["name", "image_url", "elo", "wins", "losses"],
             ]
-            st.image(
-                most_popular["image_url"].values[0],
-                width=im_size,
-                caption=most_popular["name"].values[0],
-            )
-            st.write(
-                f"**Elo:** {most_popular['elo'].values[0]:0.2f} | **Wins:** {most_popular['wins'].values[0]} | **Losses:** {most_popular['losses'].values[0]}"
-            )
+            with st.container(border=True):
+                st.image(
+                    most_popular["image_url"].values[0],
+                    width=im_size,
+                    caption=most_popular["name"].values[0],
+                )
+                st.write(
+                    f"**Elo:** {most_popular['elo'].values[0]:0.2f} | **Wins:** {most_popular['wins'].values[0]} | **Losses:** {most_popular['losses'].values[0]}"
+                )
         with center:
             st.subheader("😐 Average")
             # Find the central pokemon when sorting by elo
             sorted_pokemon = df.sort_values(by="elo")
             mid_index = len(sorted_pokemon) // 2
             most_average = sorted_pokemon.iloc[mid_index]
-            st.image(
-                most_average["image_url"],
-                width=im_size,
-                caption=most_average["name"],
-            )
-            st.write(
-                f"**Elo:** {most_average['elo']:0.2f} | **Wins:** {most_average['wins']} | **Losses:** {most_average['losses']}"
-            )
+            with st.container(border=True):
+                st.image(
+                    most_average["image_url"],
+                    width=im_size,
+                    caption=most_average["name"],
+                )
+                st.write(
+                    f"**Elo:** {most_average['elo']:0.2f} | **Wins:** {most_average['wins']} | **Losses:** {most_average['losses']}"
+                )
         with right:
             st.subheader("🪦 Least popular")
             least_popular = df.loc[
                 df["elo"] == df["elo"].min(),
                 ["name", "image_url", "elo", "wins", "losses"],
             ]
-            st.image(
-                least_popular["image_url"].values[0],
-                width=im_size,
-                caption=least_popular["name"].values[0],
-            )
-            st.write(
-                f"**Elo:** {least_popular['elo'].values[0]:0.2f} | **Wins:** {least_popular['wins'].values[0]} | **Losses:** {least_popular['losses'].values[0]}"
-            )
+            with st.container(border=True):
+                st.image(
+                    least_popular["image_url"].values[0],
+                    width=im_size,
+                    caption=least_popular["name"].values[0],
+                )
+                st.write(
+                    f"**Elo:** {least_popular['elo'].values[0]:0.2f} | **Wins:** {least_popular['wins'].values[0]} | **Losses:** {least_popular['losses'].values[0]}"
+                )
 
     # Results tab
     with tab_results:
