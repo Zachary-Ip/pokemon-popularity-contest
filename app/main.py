@@ -140,7 +140,9 @@ def select_pokemon(pokemon_data):
                 pokemon_data, key=lambda x: x.get("wins", 0) + x.get("losses", 0)
             )
             start_index = int(len(sorted_pokemon) * 0.9)
-            bottom_pokemon = sorted_pokemon[start_index:-1]
+            if start_index >= len(sorted_pokemon):
+                start_index = max(len(sorted_pokemon) - 1, 0)
+            bottom_pokemon = sorted_pokemon[start_index:]
             if len(bottom_pokemon) > 1:
                 return random.sample(bottom_pokemon, 2)
 
@@ -151,9 +153,13 @@ def select_pokemon(pokemon_data):
             num_divisions = random.randrange(4, max_divs)
             sorted_pokemon = sorted(pokemon_data, key=lambda x: x.get("elo", 0))
             div_size = len(sorted_pokemon) // num_divisions
-            div = random.randint(0, max_divs)
+            div = random.randint(0, num_divisions - 1)
             start_index = div * div_size
             end_index = start_index + div_size
+            if start_index >= len(sorted_pokemon):
+                start_index = max(len(sorted_pokemon) - div_size, 0)
+            if end_index > len(sorted_pokemon):
+                end_index = len(sorted_pokemon)
             quartile_pokemon = sorted_pokemon[start_index:end_index]
             if len(quartile_pokemon) > 1:
                 return random.sample(quartile_pokemon, 2)
