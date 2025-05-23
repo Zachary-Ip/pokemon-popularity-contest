@@ -80,19 +80,20 @@ def ensure_authenticated():
         return False
 
 
+@st.cache_data(show_spinner=False)
 def load_pokemon_data(gens=None):
-    """
-    Load all Pokemon data from Supabase database for the given list of generations.
-    """
+    """Load Pokemon data from Supabase filtered by the provided generations."""
     if gens:
         try:
             if not isinstance(gens, list):
                 gens = [gens]
 
+            gens_tuple = tuple(gens)
+
             response = (
                 supabase.table("Community Pokemon Rankings")
                 .select("*")
-                .in_("gen", gens)
+                .in_("gen", list(gens_tuple))
                 .execute()
             )
             return response.data
@@ -208,6 +209,9 @@ def update_pokemon_ratings(pokemon_list):
             if not update_response.data:
                 st.warning(f"No rows updated for Pokemon ID {pokemon_id}.")
                 st.stop()
+
+        # Invalidate cached Pokémon data after successful updates
+        load_pokemon_data.clear()
 
     except Exception as e:
         st.error(f"Failed to update Pokemon ratings: {str(e)}")
