@@ -81,20 +81,19 @@ def ensure_authenticated():
         return False
 
 
-@st.cache_data(show_spinner=False)
 def load_pokemon_data(gens=None):
-    """Load Pokemon data from Supabase filtered by the provided generations."""
+    """
+    Load all Pokemon data from Supabase database for the given list of generations.
+    """
     if gens:
         try:
             if not isinstance(gens, list):
                 gens = [gens]
 
-            gens_tuple = tuple(gens)
-
             response = (
                 supabase.table("Community Pokemon Rankings")
                 .select("*")
-                .in_("gen", list(gens_tuple))
+                .in_("gen", gens)
                 .execute()
             )
             return response.data
@@ -141,9 +140,7 @@ def select_pokemon(pokemon_data):
                 pokemon_data, key=lambda x: x.get("wins", 0) + x.get("losses", 0)
             )
             start_index = int(len(sorted_pokemon) * 0.9)
-            if start_index >= len(sorted_pokemon):
-                start_index = max(len(sorted_pokemon) - 1, 0)
-            bottom_pokemon = sorted_pokemon[start_index:]
+            bottom_pokemon = sorted_pokemon[start_index:-1]
             if len(bottom_pokemon) > 1:
                 return random.sample(bottom_pokemon, 2)
 
@@ -154,13 +151,9 @@ def select_pokemon(pokemon_data):
             num_divisions = random.randrange(4, max_divs)
             sorted_pokemon = sorted(pokemon_data, key=lambda x: x.get("elo", 0))
             div_size = len(sorted_pokemon) // num_divisions
-            div = random.randint(0, num_divisions - 1)
+            div = random.randint(0, max_divs)
             start_index = div * div_size
             end_index = start_index + div_size
-            if start_index >= len(sorted_pokemon):
-                start_index = max(len(sorted_pokemon) - div_size, 0)
-            if end_index > len(sorted_pokemon):
-                end_index = len(sorted_pokemon)
             quartile_pokemon = sorted_pokemon[start_index:end_index]
             if len(quartile_pokemon) > 1:
                 return random.sample(quartile_pokemon, 2)
@@ -216,9 +209,6 @@ def update_pokemon_ratings(pokemon_list):
             if not update_response.data:
                 st.warning(f"No rows updated for Pokemon ID {pokemon_id}.")
                 st.stop()
-
-        # Invalidate cached Pokémon data after successful updates
-        load_pokemon_data.clear()
 
     except Exception as e:
         st.error(f"Failed to update Pokemon ratings: {str(e)}")
