@@ -9,6 +9,7 @@ from supabase import Client, create_client
 
 load_dotenv()
 
+#dummy change
 
 def get_setting(key):
     # First try to get from streamlit secrets (for cloud deployment)
